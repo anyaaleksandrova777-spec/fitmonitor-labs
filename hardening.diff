@@ -1,0 +1,21 @@
+--- a/app/build.gradle.kts
++++ b/app/build.gradle.kts
+@@ -10,3 +10,4 @@
+ buildTypes {
+     release {
+-        minifyEnabled = false
++        minifyEnabled = true
++        shrinkResources = true
+     }
+ }
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -5,7 +10,8 @@
+     <application
+-        android:allowBackup="true"
++        android:allowBackup="false"
++        android:fullBackupContent="false"
+         ...>
+-        <activity android:name=".ui.DeleteNoteActivity" android:exported="true" />
++        <activity android:name=".ui.DeleteNoteActivity" android:exported="false" />
+     </application>
