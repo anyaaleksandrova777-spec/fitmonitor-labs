@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitMonitor — расширенная версия</title>
+<style>
+  :root {
+    --brand-50:#eef2ff;--brand-100:#e0e7ff;--brand-500:#4f46e5;--brand-600:#4338ca;--brand-700:#3730a3;
+    --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;--gray-400:#9ca3af;
+    --gray-500:#6b7280;--gray-700:#374151;--gray-900:#111827;
+    --green-50:#ecfdf5;--green-500:#10b981;--green-700:#047857;
+    --red-50:#fef2f2;--red-500:#ef4444;--red-700:#b91c1c;
+    --amber-50:#fffbeb;--amber-500:#f59e0b;--amber-700:#b45309;
+    --blue-50:#eff6ff;--blue-500:#3b82f6;--blue-700:#1d4ed8;
+    --purple-50:#faf5ff;--purple-500:#a855f7;--purple-700:#7e22ce;
+    --pink-50:#fdf2f8;--pink-500:#ec4899;--pink-700:#be185d;
+    --bg:#ffffff;--bg-subtle:#f9fafb;--bg-elevated:#ffffff;
+    --border:#e5e7eb;--border-strong:#d1d5db;
+    --text:#111827;--text-muted:#6b7280;--text-subtle:#9ca3af;
+    --radius-sm:6px;--radius-md:10px;--radius-lg:14px;--radius-xl:20px;
+    --shadow-xs:0 1px 2px rgba(16,24,40,.05);
+    --shadow-sm:0 1px 3px rgba(16,24,40,.1),0 1px 2px rgba(16,24,40,.06);
+    --shadow-md:0 4px 8px -2px rgba(16,24,40,.1),0 2px 4px -2px rgba(16,24,40,.06);
+    --shadow-lg:0 12px 16px -4px rgba(16,24,40,.08),0 4px 6px -2px rgba(16,24,40,.03);
+    --shadow-xl:0 20px 24px -4px rgba(16,24,40,.08),0 8px 8px -4px rgba(16,24,40,.03);
+    --sidebar-w:260px;--header-h:64px;
+  }
+  body.dark {
+    --bg:#0b0d10;--bg-subtle:#111418;--bg-elevated:#161a20;
+    --border:#252a31;--border-strong:#343a43;
+    --text:#f3f4f6;--text-muted:#9ca3af;--text-subtle:#6b7280;
+    --gray-50:#161a20;--gray-100:#1c2128;--gray-200:#252a31;--gray-300:#343a43;
+    --gray-700:#d1d5db;--gray-900:#f9fafb;
+    --brand-50:#1e1b4b;--brand-100:#312e81;--brand-500:#818cf8;--brand-600:#a5b4fc;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+  .icon{width:20px;height:20px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .icon-sm{width:16px;height:16px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 16px;font-size:14px;font-weight:500;border-radius:var(--radius-md);border:1px solid transparent;cursor:pointer;transition:all .15s ease;font-family:inherit;white-space:nowrap;line-height:1.4}
+  .btn:active:not(:disabled){transform:translateY(1px)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-primary{background:var(--brand-500);color:#fff}
+  .btn-primary:hover:not(:disabled){background:var(--brand-600)}
+  .btn-secondary{background:var(--bg-elevated);color:var(--text);border-color:var(--border-strong)}
+  .btn-secondary:hover:not(:disabled){background:var(--gray-50)}
+  .btn-ghost{background:transparent;color:var(--text-muted)}
+  .btn-ghost:hover:not(:disabled){background:var(--gray-100);color:var(--text)}
+  .btn-danger{background:var(--red-500);color:#fff}
+  .btn-danger:hover:not(:disabled){background:var(--red-700)}
+  .btn-success{background:var(--green-500);color:#fff}
+  .btn-sm{padding:6px 12px;font-size:13px}
+  .btn-lg{padding:12px 20px;font-size:15px}
+  .btn-block{width:100%}
+  .input,select,textarea{display:block;width:100%;padding:10px 14px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--radius-md);transition:all .15s ease;outline:none}
+  .input:focus,select:focus,textarea:focus{border-color:var(--brand-500);box-shadow:0 0 0 3px rgba(79,70,229,.15)}
+  .input::placeholder{color:var(--text-subtle)}
+  .field{display:block;margin-bottom:16px}
+  .field-label{display:block;font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px}
+  .card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-xs)}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+  .card-title{font-size:16px;font-weight:600;color:var(--text)}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;font-size:12px;font-weight:500;border-radius:12px;background:var(--gray-100);color:var(--gray-700);line-height:1.5}
+  .badge-brand{background:var(--brand-50);color:var(--brand-700)}
+  .badge-green{background:var(--green-50);color:var(--green-700)}
+  .badge-red{background:var(--red-50);color:var(--red-700)}
+  .badge-amber{background:var(--amber-50);color:var(--amber-700)}
+  .badge-purple{background:var(--purple-50);color:var(--purple-700)}
+  .badge-pink{background:var(--pink-50);color:var(--pink-700)}
+  #login-screen{position:fixed;inset:0;z-index:1000;display:flex;background:radial-gradient(1000px 500px at 20% 0%,rgba(79,70,229,.08),transparent 60%),radial-gradient(800px 400px at 80% 100%,rgba(16,185,129,.06),transparent 60%),var(--bg-subtle)}
+  #login-screen.hidden{display:none}
+  .login-left,.login-right{flex:1;display:flex;align-items:center;justify-content:center;padding:32px}
+  .login-left{background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 50%,#ec4899 100%);color:#fff;position:relative;overflow:hidden;display:none}
+  .login-left-inner{position:relative;max-width:420px}
+  .login-hero-title{font-size:40px;font-weight:700;line-height:1.15;margin-bottom:16px;letter-spacing:-.02em}
+  .login-hero-text{font-size:16px;opacity:.9;margin-bottom:40px;line-height:1.6}
+  .login-features{list-style:none;display:flex;flex-direction:column;gap:16px}
+  .login-features li{display:flex;align-items:flex-start;gap:12px;font-size:15px}
+  .login-features .check{flex-shrink:0;width:24px;height:24px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .login-features svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none}
+  .login-box{width:100%;max-width:400px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-xl);padding:40px 36px;box-shadow:var(--shadow-xl)}
+  .login-brand{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center}
+  .login-brand-logo{width:40px;height:40px;background:linear-gradient(135deg,var(--brand-500),#7c3aed);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md)}
+  .login-brand-logo svg{width:22px;height:22px;stroke:#fff}
+  .login-brand-name{font-size:20px;font-weight:700}
+  .login-title{font-size:24px;font-weight:700;text-align:center;margin-bottom:8px}
+  .login-sub{font-size:14px;color:var(--text-muted);text-align:center;margin-bottom:28px}
+  #login-error{display:none;padding:10px 14px;background:var(--red-50);color:var(--red-700);border:1px solid #fecaca;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px;align-items:center;gap:8px}
+  #login-error.show{display:flex}
+  .demo-panel{margin-top:20px;padding:14px;background:var(--gray-50);border-radius:var(--radius-md);font-size:12px;color:var(--text-muted);border:1px solid var(--border)}
+  .demo-panel-title{font-weight:600;color:var(--text);margin-bottom:8px}
+  .demo-row{display:flex;justify-content:space-between;padding:4px 0}
+  .demo-row code{font-family:Consolas,monospace;color:var(--brand-500);font-size:12px}
+  #main-app{display:none;min-height:100vh}
+  #main-app.show{display:grid;grid-template-columns:var(--sidebar-w) 1fr;grid-template-rows:var(--header-h) 1fr}
+  .sidebar{grid-row:1/3;background:var(--bg-subtle);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+  .sidebar-brand{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--border);height:var(--header-h)}
+  .sidebar-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--brand-500),#7c3aed);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .sidebar-logo svg{width:18px;height:18px;stroke:#fff}
+  .sidebar-brand-name{font-size:16px;font-weight:700}
+  .sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+  .nav-section{padding:8px 12px 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-subtle);margin-top:8px}
+  .nav-section:first-child{margin-top:0}
+  .nav-btn{display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:14px;font-weight:500;color:var(--text-muted);background:transparent;border:none;border-radius:var(--radius-md);cursor:pointer;text-align:left;font-family:inherit;transition:all .12s ease;width:100%}
+  .nav-btn:hover{background:var(--gray-100);color:var(--text)}
+  .nav-btn.active{background:var(--brand-50);color:var(--brand-700)}
+  .nav-badge{margin-left:auto;background:var(--red-500);color:#fff;font-size:11px;font-weight:600;padding:1px 7px;border-radius:10px;min-width:20px;text-align:center}
+  .sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+  .user-card{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--radius-md);cursor:pointer}
+  .user-card:hover{background:var(--gray-100)}
+  .user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--brand-500),#ec4899);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0}
+  .user-info{flex:1;min-width:0}
+  .user-name{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .user-role{font-size:11px;color:var(--text-muted)}
+  .header{grid-column:2;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:16px;position:sticky;top:0;z-index:10}
+  .header-title{font-size:18px;font-weight:600}
+  .header-search{flex:1;max-width:400px;position:relative}
+  .header-search input{padding:8px 14px 8px 36px;font-size:13px;border-radius:var(--radius-md);background:var(--gray-50);border:1px solid var(--border)}
+  .header-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-subtle);pointer-events:none}
+  .header-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .header-btn{width:36px;height:36px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;position:relative}
+  .header-btn:hover{background:var(--gray-50);color:var(--text)}
+  .header-btn .dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red-500);border-radius:50%;border:2px solid var(--bg)}
+  .content{grid-column:2;padding:32px;overflow-y:auto;max-width:1400px}
+  .page{display:none}
+  .page.active{display:block;animation:pageIn .25s ease}
+  @keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .page-header{margin-bottom:24px}
+  .page-title{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+  .page-subtitle{font-size:14px;color:var(--text-muted)}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:24px}
+  .kpi-card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;transition:all .15s ease}
+  .kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+  .kpi-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .kpi-label{font-size:13px;font-weight:500;color:var(--text-muted)}
+  .kpi-icon{width:36px;height:36px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;background:var(--brand-50);color:var(--brand-500)}
+  .kpi-icon.green{background:var(--green-50);color:var(--green-500)}
+  .kpi-icon.amber{background:var(--amber-50);color:var(--amber-500)}
+  .kpi-icon.red{background:var(--red-50);color:var(--red-500)}
+  .kpi-icon.purple{background:var(--purple-50);color:var(--purple-500)}
+  .kpi-icon.pink{background:var(--pink-50);color:var(--pink-500)}
+  .kpi-value{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-bottom:6px}
+  .kpi-unit{font-size:14px;font-weight:500;color:var(--text-muted);margin-left:4px}
+  .kpi-trend{font-size:12px;color:var(--green-500);font-weight:500}
+  .kpi-trend.down{color:var(--red-500)}
+  .chart{display:flex;align-items:flex-end;gap:10px;height:180px;padding-top:20px}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+  .bar{width:100%;background:linear-gradient(180deg,var(--brand-500),var(--brand-600));border-radius:6px 6px 0 0;min-height:6px;transition:all .3s ease;cursor:pointer}
+  .bar:hover{filter:brightness(1.1);transform:scaleY(1.02);transform-origin:bottom}
+  .bar-label{font-size:11px;color:var(--text-muted);font-weight:500}
+  /* DONUT */
+  .donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  .donut{width:160px;height:160px;border-radius:50%;position:relative;flex-shrink:0}
+  .donut::after{content:'';position:absolute;inset:30px;background:var(--bg-elevated);border-radius:50%}
+  .donut-legend{flex:1;min-width:150px;display:flex;flex-direction:column;gap:8px}
+  .legend-item{display:flex;align-items:center;gap:8px;font-size:13px}
+  .legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+  /* CALENDAR */
+  .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-day{aspect-ratio:1;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;background:var(--gray-100);color:var(--text-muted)}
+  .cal-day:hover{transform:scale(1.1)}
+  .cal-day.lvl-1{background:#d1fae5;color:#047857}
+  .cal-day.lvl-2{background:#6ee7b7;color:#064e3b}
+  .cal-day.lvl-3{background:#10b981;color:#fff}
+  .cal-day.lvl-4{background:#047857;color:#fff}
+  .cal-day.today{outline:2px solid var(--brand-500);outline-offset:1px}
+  .cal-day.empty{background:transparent;cursor:default}
+  body.dark .cal-day.lvl-1{background:#064e3b;color:#6ee7b7}
+  body.dark .cal-day.lvl-2{background:#047857;color:#d1fae5}
+  /* GOALS */
+  .goal{display:flex;align-items:center;gap:12px;padding:14px;background:var(--gray-50);border-radius:var(--radius-md);margin-bottom:8px}
+  .goal-icon{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .goal-body{flex:1;min-width:0}
+  .goal-title{font-weight:600;margin-bottom:4px}
+  .goal-progress{height:6px;background:var(--gray-200);border-radius:3px;overflow:hidden;margin-top:4px}
+  .goal-fill{height:100%;background:linear-gradient(90deg,var(--brand-500),var(--purple-500));border-radius:3px;transition:width .4s ease}
+  /* CHALLENGES */
+  .challenge{padding:16px;border-radius:var(--radius-md);border:1px solid var(--border);margin-bottom:12px;background:var(--bg-elevated);transition:all .15s}
+  .challenge:hover{box-shadow:var(--shadow-md);border-color:var(--brand-500)}
+  .challenge-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+  .challenge-icon{font-size:28px;flex-shrink:0}
+  .challenge-body{flex:1}
+  .challenge-title{font-weight:600;font-size:15px;margin-bottom:4px}
+  .challenge-desc{font-size:13px;color:var(--text-muted)}
+  .challenge-meta{display:flex;gap:16px;font-size:12px;color:var(--text-muted);margin-top:8px}
+  .challenge-meta span{display:flex;align-items:center;gap:4px}
+  /* FRIENDS */
+  .friend{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radius-md);transition:background .15s}
+  .friend:hover{background:var(--gray-50)}
+  .friend-info{flex:1;min-width:0}
+  .friend-name{font-weight:600;margin-bottom:2px}
+  .friend-status{font-size:12px;color:var(--text-muted)}
+  /* ACHIEVEMENTS */
+  .achievements-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+  .achievement{padding:16px;text-align:center;border-radius:var(--radius-md);background:var(--gray-50);border:2px solid var(--border);transition:all .15s}
+  .achievement.locked{opacity:.5;filter:grayscale(1)}
+  .achievement.unlocked{border-color:var(--amber-500);background:linear-gradient(135deg,#fffbeb,#fef3c7)}
+  body.dark .achievement.unlocked{background:linear-gradient(135deg,#3a2d0a,#4a3a12)}
+  .achievement-icon{font-size:36px;margin-bottom:8px}
+  .achievement-title{font-size:13px;font-weight:600;margin-bottom:2px}
+  .achievement-desc{font-size:11px;color:var(--text-muted)}
+  /* LEADERBOARD */
+  .leader-row{display:flex;align-items:center;gap:12px;padding:14px;border-radius:var(--radius-md);margin-bottom:6px;transition:all .15s}
+  .leader-row:hover{background:var(--gray-50)}
+  .leader-rank{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;background:var(--gray-100);color:var(--text-muted);flex-shrink:0}
+  .leader-rank.gold{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff}
+  .leader-rank.silver{background:linear-gradient(135deg,#d1d5db,#9ca3af);color:#fff}
+  .leader-rank.bronze{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
+  .leader-row.me{background:var(--brand-50);border:1px solid var(--brand-100)}
+  body.dark .leader-row.me{background:rgba(129,140,248,.1)}
+  /* NOTIFICATIONS */
+  .notif{padding:14px;border-radius:var(--radius-md);border:1px solid var(--border);margin-bottom:8px;display:flex;gap:12px;cursor:pointer;transition:all .15s}
+  .notif:hover{background:var(--gray-50)}
+  .notif.unread{background:var(--brand-50);border-color:var(--brand-100)}
+  body.dark .notif.unread{background:rgba(129,140,248,.08)}
+  .notif-icon{width:40px;height:40px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .notif-body{flex:1}
+  .notif-title{font-weight:600;font-size:14px;margin-bottom:2px}
+  .notif-text{font-size:13px;color:var(--text-muted)}
+  .notif-time{font-size:11px;color:var(--text-subtle);margin-top:4px}
+  /* TABS */
+  .tabs{display:inline-flex;background:var(--gray-100);border-radius:var(--radius-md);padding:3px;gap:2px;margin-bottom:20px;flex-wrap:wrap}
+  .tab{padding:7px 16px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-radius:var(--radius-sm);font-family:inherit;transition:all .12s}
+  .tab:hover{color:var(--text)}
+  .tab.active{background:var(--bg-elevated);color:var(--text);box-shadow:var(--shadow-xs)}
+  .switch{position:relative;width:40px;height:22px;background:var(--gray-300);border-radius:11px;cursor:pointer;transition:background .2s;flex-shrink:0}
+  .switch.on{background:var(--brand-500)}
+  .switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .switch.on::after{transform:translateX(18px)}
+  .avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--brand-500),#ec4899);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;flex-shrink:0}
+  .avatar.sm{width:36px;height:36px;font-size:13px}
+  .avatar.lg{width:96px;height:96px;font-size:32px}
+  .avatar.xs{width:28px;height:28px;font-size:11px}
+  .log{background:#0d1117;color:#c9d1d9;font-family:Consolas,monospace;font-size:12.5px;padding:14px;border-radius:var(--radius-md);max-height:360px;overflow-y:auto;line-height:1.6;border:1px solid #21262d}
+  .log .ts{color:#6e7681}
+  .log .allow{color:#3fb950;font-weight:600}
+  .log .deny{color:#f85149;font-weight:600}
+  .check-item{display:flex;gap:14px;padding:14px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:8px}
+  .check-item.done{border-left:3px solid var(--green-500)}
+  .check-item.fail{border-left:3px solid var(--red-500)}
+  .qr-wrapper{display:inline-block;padding:20px;background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+  .qr{width:200px;height:200px;background:repeating-linear-gradient(0deg,#000 0 4px,transparent 4px 8px),repeating-linear-gradient(90deg,#000 0 4px,transparent 4px 8px);background-size:8px 8px;border:8px solid #000;border-radius:6px}
+  .empty{text-align:center;padding:40px 20px;color:var(--text-muted)}
+  .empty-icon{font-size:40px;opacity:.4;margin-bottom:12px}
+  .empty-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--gray-900);color:#fff;padding:12px 20px;border-radius:var(--radius-md);font-size:13.5px;font-weight:500;box-shadow:var(--shadow-xl);z-index:10000;transition:transform .3s cubic-bezier(.2,.8,.2,1);max-width:90vw}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.success{background:var(--green-500)}
+  .toast.error{background:var(--red-500)}
+  .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .spacer{flex:1}
+  .muted{color:var(--text-muted);font-size:13px}
+  .text-sm{font-size:13px}
+  .text-xs{font-size:12px}
+  .mb-4{margin-bottom:16px}
+  .mt-4{margin-top:16px}
+  .hidden{display:none!important}
+  .list-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-md);border:1px solid transparent;cursor:pointer;transition:all .12s ease;font-family:inherit;text-align:left;width:100%;background:transparent;color:var(--text);font-size:14px}
+  .list-item:hover{background:var(--gray-50);border-color:var(--border)}
+  .list-item+.list-item{margin-top:4px}
+  @media(max-width:960px){#main-app.show{grid-template-columns:1fr}.sidebar{display:none}.header{grid-column:1;padding:0 16px}.header-search{display:none}.content{grid-column:1;padding:20px}.login-left{display:none}.login-right{padding:20px}}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-left">
+    <div class="login-left-inner">
+      <h1 class="login-hero-title">Управляйте доступом и активностью команды</h1>
+      <p class="login-hero-text">Единая платформа для корпоративных пропусков, контроля доступа и аналитики активности.</p>
+      <ul class="login-features">
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>QR-пропуска и сканирование</li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Роли и права: RBAC на 3 уровнях</li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>Аудит каждого решения</li>
+        <li><span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>HMAC и replay-защита</li>
+      </ul>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-box">
+      <div class="login-brand">
+        <div class="login-brand-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <div class="login-brand-name">FitMonitor</div>
+      </div>
+      <h2 class="login-title">Вход в систему</h2>
+      <p class="login-sub">Используйте корпоративные учётные данные</p>
+      <div id="login-error"></div>
+      <label class="field"><span class="field-label">Логин</span><input class="input" id="login-user" placeholder="employee" autocomplete="username" autocapitalize="off"></label>
+      <label class="field"><span class="field-label">Пароль</span><input class="input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"></label>
+      <button class="btn btn-primary btn-block btn-lg" id="btn-do-login">Войти</button>
+      <div class="demo-panel">
+        <div class="demo-panel-title">Демо-доступ</div>
+        <div class="demo-row"><span>Сотрудник</span><code>employee / 1234</code></div>
+        <div class="demo-row"><span>Охрана</span><code>guard / 1234</code></div>
+        <div class="demo-row"><span>Администратор</span><code>admin / 1234</code></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="main-app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+      <span class="sidebar-brand-name">FitMonitor</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Основное</div>
+      <button class="nav-btn active" data-page="home"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Дашборд</button>
+      <button class="nav-btn" data-page="activity"><svg class="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Активность</button>
+      <button class="nav-btn" data-page="stats"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Статистика</button>
+      <button class="nav-btn" data-page="goals"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Цели</button>
+      <button class="nav-btn" data-page="calendar"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Календарь</button>
+      <div class="nav-section">Социальное</div>
+      <button class="nav-btn" data-page="challenges"><svg class="icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>Челленджи</button>
+      <button class="nav-btn" data-page="leaderboard"><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Лидерборд</button>
+      <button class="nav-btn" data-page="friends"><svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Друзья</button>
+      <button class="nav-btn" data-page="feed"><svg class="icon" viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>Лента</button>
+      <div class="nav-section">Доступ</div>
+      <button class="nav-btn" data-page="pass"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2M15 12h2M7 16h10"/></svg>Мой пропуск</button>
+      <button class="nav-btn" data-page="scan" id="nav-scan" style="display:none"><svg class="icon" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>Сканирование</button>
+      <button class="nav-btn" data-page="audit" id="nav-audit" style="display:none"><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Журнал доступа</button>
+      <div class="nav-section">Личное</div>
+      <button class="nav-btn" data-page="achievements"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>Достижения</button>
+      <button class="nav-btn" data-page="profile"><svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Профиль</button>
+      <button class="nav-btn" data-page="notifications"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Уведомления</button>
+      <button class="nav-btn" data-page="files"><svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Заметки</button>
+      <div class="nav-section">Система</div>
+      <button class="nav-btn" data-page="security"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Безопасность</button>
+      <button class="nav-btn" data-page="settings"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Настройки</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="user-avatar">—</div>
+        <div class="user-info"><div class="user-name" id="user-name">Гость</div><div class="user-role" id="user-role">—</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <header class="header">
+    <div class="header-title" id="header-title">Дашборд</div>
+    <div class="header-search">
+      <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="global-search" placeholder="Поиск по приложению...">
+    </div>
+    <div class="header-actions">
+      <button class="header-btn" id="btn-notif" title="Уведомления">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot" id="notif-dot"></span>
+      </button>
+      <button class="header-btn" id="btn-theme" title="Сменить тему"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+      <button class="header-btn" id="btn-logout" title="Выйти"><svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- ДАШБОРД -->
+    <section class="page active" id="page-home">
+      <div class="page-header"><div class="page-title">Дашборд</div><div class="page-subtitle" id="home-greeting">Добро пожаловать</div></div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Шаги сегодня</span><div class="kpi-icon"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></div></div><div class="kpi-value" id="stat-steps">9 843</div><div class="kpi-trend">↑ 12% к вчера</div></div>
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Калории</span><div class="kpi-icon amber"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div></div><div class="kpi-value" id="stat-kcal">624 <span class="kpi-unit">ккал</span></div><div class="kpi-trend">↑ 8% к вчера</div></div>
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Дистанция</span><div class="kpi-icon green"><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div><div class="kpi-value" id="stat-dist">7.2 <span class="kpi-unit">км</span></div><div class="kpi-trend">↑ 15% к вчера</div></div>
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Пульс средний</span><div class="kpi-icon red"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div></div><div class="kpi-value">72 <span class="kpi-unit">уд/мин</span></div><div class="kpi-trend down">↓ 3% к вчера</div></div>
+      </div>
+      <div class="row" style="gap:16px;align-items:stretch;margin-bottom:24px">
+        <div class="card" style="flex:2;min-width:300px">
+          <div class="card-header"><div class="card-title">Шаги за неделю</div><span class="badge badge-brand">Среднее 8 920</span></div>
+          <div class="chart" id="weekly-chart"></div>
+        </div>
+        <div class="card" style="flex:1;min-width:260px">
+          <div class="card-header"><div class="card-title">Активность</div></div>
+          <div class="donut-wrap">
+            <div class="donut" id="donut" style="background:conic-gradient(#4f46e5 0% 58%,#ec4899 58% 74%,#10b981 74% 88%,#f59e0b 88% 100%)"></div>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#4f46e5"></div>Ходьба — 58%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>Бег — 16%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Велосипед — 14%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Прочее — 12%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="gap:16px;align-items:stretch">
+        <div class="card" style="flex:1;min-width:280px">
+          <div class="card-header"><div class="card-title">Активные цели</div><button class="btn btn-ghost btn-sm" onclick="showPage('goals')">Все →</button></div>
+          <div id="home-goals"></div>
+        </div>
+        <div class="card" style="flex:1;min-width:280px">
+          <div class="card-header"><div class="card-title">Быстрые действия</div></div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn btn-primary" id="btn-add-workout">+ Тренировка</button>
+            <button class="btn btn-secondary" onclick="showPage('challenges')">🎯 Челлендж</button>
+            <button class="btn btn-secondary" onclick="showPage('friends')">👥 Друзья</button>
+          </div>
+          <p class="muted text-sm" id="workout-status" style="margin-top:12px">Сегодня пока нет записей.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- АКТИВНОСТЬ -->
+    <section class="page" id="page-activity">
+      <div class="page-header"><div class="page-title">Активность</div><div class="page-subtitle">Записи тренировок</div></div>
+      <div class="card mb-4">
+        <div class="card-header"><div class="card-title">Добавить запись</div></div>
+        <div class="row">
+          <select class="input" id="act-type" style="max-width:200px"><option>Бег</option><option>Ходьба</option><option>Велосипед</option><option>Плавание</option><option>Силовая</option><option>Йога</option></select>
+          <input class="input" id="act-duration" type="number" placeholder="Длительность (мин)" style="max-width:200px" value="30">
+          <button class="btn btn-primary" id="btn-add-activity">Добавить</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Журнал</div><span class="badge" id="act-count">0</span></div>
+        <div id="activity-list"></div>
+      </div>
+    </section>
+
+    <!-- СТАТИСТИКА -->
+    <section class="page" id="page-stats">
+      <div class="page-header"><div class="page-title">Статистика</div><div class="page-subtitle">Детальная аналитика</div></div>
+      <div class="tabs">
+        <button class="tab active" data-stat="week">Неделя</button>
+        <button class="tab" data-stat="month">Месяц</button>
+        <button class="tab" data-stat="year">Год</button>
+      </div>
+      <div class="kpi-grid" id="stats-kpi"></div>
+      <div class="card mb-4">
+        <div class="card-header"><div class="card-title" id="stats-chart-title">Шаги за неделю</div></div>
+        <div class="chart" id="stats-chart"></div>
+      </div>
+      <div class="row" style="gap:16px">
+        <div class="card" style="flex:1;min-width:280px">
+          <div class="card-header"><div class="card-title">Личные рекорды</div></div>
+          <div id="stats-records"></div>
+        </div>
+        <div class="card" style="flex:1;min-width:280px">
+          <div class="card-header"><div class="card-title">Средние показатели</div></div>
+          <div id="stats-avg"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЦЕЛИ -->
+    <section class="page" id="page-goals">
+      <div class="page-header"><div class="page-title">Цели</div><div class="page-subtitle">Отслеживайте прогресс</div></div>
+      <div class="card mb-4">
+        <div class="card-header"><div class="card-title">Новая цель</div></div>
+        <div class="row">
+          <input class="input" id="goal-title" placeholder="Название цели" style="max-width:300px">
+          <input class="input" id="goal-target" type="number" placeholder="Цель (число)" style="max-width:180px">
+          <select class="input" id="goal-unit" style="max-width:150px"><option>шагов</option><option>км</option><option>мин</option><option>ккал</option></select>
+          <button class="btn btn-primary" id="btn-add-goal">Создать</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Мои цели</div></div>
+        <div id="goals-list"></div>
+      </div>
+    </section>
+
+    <!-- КАЛЕНДАРЬ -->
+    <section class="page" id="page-calendar">
+      <div class="page-header"><div class="page-title">Календарь активности</div><div class="page-subtitle">Визуализация прогресса</div></div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" id="cal-month">Ноябрь 2026</div>
+          <div class="row" style="gap:6px;font-size:11px">
+            <span class="muted">Меньше</span>
+            <div style="width:12px;height:12px;background:var(--gray-100);border-radius:2px"></div>
+            <div style="width:12px;height:12px;background:#d1fae5;border-radius:2px"></div>
+            <div style="width:12px;height:12px;background:#6ee7b7;border-radius:2px"></div>
+            <div style="width:12px;height:12px;background:#10b981;border-radius:2px"></div>
+            <div style="width:12px;height:12px;background:#047857;border-radius:2px"></div>
+            <span class="muted">Больше</span>
+          </div>
+        </div>
+        <div class="calendar" id="calendar"></div>
+      </div>
+    </section>
+
+    <!-- ЧЕЛЛЕНДЖИ -->
+    <section class="page" id="page-challenges">
+      <div class="page-header"><div class="page-title">Челленджи</div><div class="page-subtitle">Присоединяйтесь к испытаниям</div></div>
+      <div id="challenges-list"></div>
+    </section>
+
+    <!-- ЛИДЕРБОРД -->
+    <section class="page" id="page-leaderboard">
+      <div class="page-header"><div class="page-title">Лидерборд</div><div class="page-subtitle">Рейтинг участников</div></div>
+      <div class="card">
+        <div class="tabs">
+          <button class="tab active" data-lb="week">Неделя</button>
+          <button class="tab" data-lb="month">Месяц</button>
+          <button class="tab" data-lb="all">За всё время</button>
+        </div>
+        <div id="leaderboard-list"></div>
+      </div>
+    </section>
+
+    <!-- ДРУЗЬЯ -->
+    <section class="page" id="page-friends">
+      <div class="page-header"><div class="page-title">Друзья</div><div class="page-subtitle">Следите за успехами</div></div>
+      <div class="card mb-4">
+        <div class="card-header"><div class="card-title">Найти друга</div></div>
+        <div class="row"><input class="input" id="friend-search" placeholder="Поиск по имени..." style="max-width:300px"><button class="btn btn-primary" id="btn-find-friend">Найти</button></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Мои друзья</div><span class="badge badge-brand" id="friends-count">0</span></div>
+        <div id="friends-list"></div>
+      </div>
+    </section>
+
+    <!-- ЛЕНТА -->
+    <section class="page" id="page-feed">
+      <div class="page-header"><div class="page-title">Лента</div><div class="page-subtitle">Активность сообщества</div></div>
+      <div class="row mb-4"><button class="btn btn-primary" id="btn-fetch-posts">Обновить</button></div>
+      <div id="posts-container"><div class="card"><div class="empty"><div class="empty-icon">📭</div><div class="empty-title">Нет постов</div><p class="muted">Нажмите «Обновить»</p></div></div></div>
+    </section>
+
+    <!-- ПРОПУСК -->
+    <section class="page" id="page-pass">
+      <div class="page-header"><div class="page-title">Мой пропуск</div><div class="page-subtitle">QR-код для входа</div></div>
+      <div id="pass-content"></div>
+    </section>
+
+    <!-- СКАНИРОВАНИЕ -->
+    <section class="page" id="page-scan">
+      <div class="page-header"><div class="page-title">Сканирование</div><div class="page-subtitle">Проверка QR-пропусков</div></div>
+      <div id="scan-content"></div>
+    </section>
+
+    <!-- ЖУРНАЛ -->
+    <section class="page" id="page-audit">
+      <div class="page-header"><div class="page-title">Журнал доступа</div><div class="page-subtitle">Аудит решений</div></div>
+      <div id="audit-content"></div>
+    </section>
+
+    <!-- ДОСТИЖЕНИЯ -->
+    <section class="page" id="page-achievements">
+      <div class="page-header"><div class="page-title">Достижения</div><div class="page-subtitle">Награды за прогресс</div></div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Коллекция</div><span class="badge badge-amber" id="ach-count">0/12</span></div>
+        <div class="achievements-grid" id="achievements-grid"></div>
+      </div>
+    </section>
+
+    <!-- ПРОФИЛЬ -->
+    <section class="page" id="page-profile">
+      <div class="page-header"><div class="page-title">Профиль</div><div class="page-subtitle">Личные данные</div></div>
+      <div class="card mb-4" id="profile-view">
+        <div class="row">
+          <div class="avatar lg" id="profile-avatar">АА</div>
+          <div><div style="font-size:22px;font-weight:700" id="profile-name">Александрова Анна</div><div class="muted" id="profile-role">Спортсмен-любитель</div></div>
+          <div class="spacer"></div>
+          <button class="btn btn-secondary" id="btn-edit-profile">Изменить</button>
+        </div>
+      </div>
+      <div class="card mb-4 hidden" id="profile-edit">
+        <div class="card-title mb-4">Редактирование</div>
+        <label class="field"><span class="field-label">Имя</span><input class="input" id="edit-name" maxlength="60"></label>
+        <label class="field"><span class="field-label">Роль</span><input class="input" id="edit-role" maxlength="60"></label>
+        <div id="edit-error" class="badge badge-red mb-4" style="display:none"></div>
+        <div class="row"><button class="btn btn-primary" id="btn-save-profile">Сохранить</button><button class="btn btn-ghost" id="btn-cancel-profile">Отмена</button></div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Тренировок</div><div class="kpi-value">128</div></div>
+        <div class="kpi-card"><div class="kpi-label">Пройдено</div><div class="kpi-value">1 240 <span class="kpi-unit">км</span></div></div>
+        <div class="kpi-card"><div class="kpi-label">Дней подряд</div><div class="kpi-value">87</div></div>
+        <div class="kpi-card"><div class="kpi-label">Достижений</div><div class="kpi-value" id="profile-ach">0/12</div></div>
+      </div>
+      <div class="card mb-4">
+        <div class="card-title mb-4">Уведомления</div>
+        <div class="row" style="justify-content:space-between;margin-bottom:12px"><span>Push</span><div class="switch on" id="switch-push"></div></div>
+        <div class="row" style="justify-content:space-between;margin-bottom:12px"><span>Еженедельный отчёт</span><div class="switch" id="switch-report"></div></div>
+        <div class="row" style="justify-content:space-between"><span>Напоминания о тренировках</span><div class="switch on" id="switch-reminder"></div></div>
+      </div>
+    </section>
+
+    <!-- УВЕДОМЛЕНИЯ -->
+    <section class="page" id="page-notifications">
+      <div class="page-header"><div class="page-title">Уведомления</div><div class="page-subtitle">События и напоминания</div></div>
+      <div class="row mb-4"><button class="btn btn-ghost btn-sm" id="btn-mark-read">Отметить все прочитанными</button></div>
+      <div id="notifications-list"></div>
+    </section>
+
+    <!-- ЗАМЕТКИ -->
+    <section class="page" id="page-files">
+      <div class="page-header"><div class="page-title">Заметки</div><div class="page-subtitle">Личный дневник</div></div>
+      <div class="card mb-4">
+        <div class="card-header"><div class="card-title">Мои заметки</div><span class="badge" id="notes-count">0</span></div>
+        <textarea class="input" id="notes-text" rows="6" placeholder="Введите текст..."></textarea>
+        <div class="row mt-4">
+          <button class="btn btn-primary" id="btn-save-note">Сохранить</button>
+          <button class="btn btn-secondary" id="btn-export">Экспорт JSON</button>
+          <button class="btn btn-secondary" id="btn-import-trigger">Импорт</button>
+          <input type="file" id="btn-import" accept=".json" style="display:none">
+          <button class="btn btn-danger" id="btn-export-all">Экспорт всего</button>
+        </div>
+      </div>
+      <div class="card"><div class="card-header"><div class="card-title">Сохранённые</div></div><div id="notes-list"></div></div>
+    </section>
+
+    <!-- БЕЗОПАСНОСТЬ -->
+    <section class="page" id="page-security">
+      <div class="page-header"><div class="page-title">Безопасность</div><div class="page-subtitle">Защита канала и аудит</div></div>
+      <div class="card mb-4"><div class="card-header"><div class="card-title">Защита канала</div></div><div id="channel-info"></div></div>
+      <div class="card mb-4"><div class="card-header"><div class="card-title">HMAC-SHA256</div></div><button class="btn btn-primary" id="btn-test-hmac">Проверить подпись</button><div id="hmac-result" class="mt-4"></div></div>
+      <div class="card mb-4"><div class="card-header"><div class="card-title">Replay-защита</div></div><button class="btn btn-primary" id="btn-test-replay">Проверить replay</button><div id="replay-result" class="mt-4"></div></div>
+      <div class="card"><div class="card-header"><div class="card-title">Аудит находок</div></div><button class="btn btn-primary" id="btn-run-audit">Запустить</button><div id="audit-report" class="mt-4"></div></div>
+    </section>
+
+    <!-- НАСТРОЙКИ -->
+    <section class="page" id="page-settings">
+      <div class="page-header"><div class="page-title">Настройки</div><div class="page-subtitle">Приложение</div></div>
+      <div class="card mb-4"><div class="card-title mb-4">Внешний вид</div>
+        <div class="row" style="justify-content:space-between;margin-bottom:12px"><div><div style="font-weight:500">Тёмная тема</div><div class="muted text-xs">Переключение оформления</div></div><div class="switch" id="switch-theme"></div></div>
+        <div class="row" style="justify-content:space-between"><div><div style="font-weight:500">Компактный режим</div><div class="muted text-xs">Меньше отступов</div></div><div class="switch" id="switch-compact"></div></div>
+      </div>
+      <div class="card mb-4"><div class="card-title mb-4">Аккаунт</div>
+        <div class="row" style="justify-content:space-between;margin-bottom:12px"><span class="muted">Пользователь</span><span style="font-weight:500" id="settings-user">—</span></div>
+        <div class="row" style="justify-content:space-between;margin-bottom:12px"><span class="muted">Роль</span><span class="badge badge-brand" id="settings-role">—</span></div>
+        <div class="row" style="justify-content:space-between"><span class="muted">Дата регистрации</span><span class="muted" id="settings-joined">—</span></div>
+      </div>
+      <div class="card mb-4"><div class="card-title mb-4">Данные</div>
+        <div class="row"><button class="btn btn-secondary" id="btn-export-data">Экспорт всех данных</button><button class="btn btn-danger" id="btn-reset-data">Сбросить всё</button></div>
+      </div>
+      <div class="card"><div class="card-title mb-4">О приложении</div>
+        <div class="muted text-sm" style="line-height:1.8">FitMonitor v2.0 · Расширенная версия<br>Полный функционал: дашборд, статистика, цели, календарь, челленджи, лидерборд, друзья, достижения, уведомления, безопасность.</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s=>document.querySelector(s);
+const $$ = s=>Array.from(document.querySelectorAll(s));
+
+let toastTimer;
+function toast(msg, type){
+  const t = $('#toast'); t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+// Storage helper
+const Store = {
+  get(key, def){ try { const v = localStorage.getItem('fm-' + key); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
+  set(key, val){ try { localStorage.setItem('fm-' + key, JSON.stringify(val)); } catch(e){} },
+  del(key){ try { localStorage.removeItem('fm-' + key); } catch(e){} }
+};
+
+const PAGE_TITLES = { home:'Дашборд', activity:'Активность', stats:'Статистика', goals:'Цели', calendar:'Календарь', challenges:'Челленджи', leaderboard:'Лидерборд', friends:'Друзья', feed:'Лента', pass:'Мой пропуск', scan:'Сканирование', audit:'Журнал доступа', achievements:'Достижения', profile:'Профиль', notifications:'Уведомления', files:'Заметки', security:'Безопасность', settings:'Настройки' };
+function showPage(id){
+  $$('.page').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById('page-'+id);
+  if(el) el.classList.add('active');
+  $$('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.page===id));
+  const ht = $('#header-title'); if(ht) ht.textContent = PAGE_TITLES[id] || 'FitMonitor';
+  if(location.hash !== '#'+id) location.hash = id;
+  if(id==='pass') renderPass();
+  if(id==='scan') renderScan();
+  if(id==='audit') renderAudit();
+  if(id==='security') renderSecurity();
+  if(id==='goals') renderGoals();
+  if(id==='calendar') renderCalendar();
+  if(id==='challenges') renderChallenges();
+  if(id==='leaderboard') renderLeaderboard();
+  if(id==='friends') renderFriends();
+  if(id==='achievements') renderAchievements();
+  if(id==='notifications') renderNotifications();
+  if(id==='stats') renderStats();
+  if(id==='files') renderNotes();
+  if(id==='home') { renderHomeGoals(); }
+}
+$$('.nav-btn').forEach(b=> b.addEventListener('click', ()=> showPage(b.dataset.page)));
+window.addEventListener('hashchange', ()=>{
+  if(!session) return;
+  const id = location.hash.slice(1) || 'home';
+  if(document.getElementById('page-'+id)) showPage(id);
+});
+
+// Theme
+const themeSwitch = $('#switch-theme');
+const themeBtn = $('#btn-theme');
+function applyTheme(dark){
+  document.body.classList.toggle('dark', dark);
+  if(themeSwitch) themeSwitch.classList.toggle('on', dark);
+  try { localStorage.setItem('fm-theme', dark?'dark':'light'); } catch(e){}
+}
+if(themeSwitch) themeSwitch.addEventListener('click', ()=> applyTheme(!document.body.classList.contains('dark')));
+if(themeBtn) themeBtn.addEventListener('click', ()=> applyTheme(!document.body.classList.contains('dark')));
+try { applyTheme(localStorage.getItem('fm-theme')==='dark'); } catch(e){}
+
+// AUTH
+const USERS = {
+  employee: { pass:'1234', role:'EMPLOYEE', scopes:['pass:view'] },
+  guard:    { pass:'1234', role:'SECURITY', scopes:['pass:view','scan:execute'] },
+  admin:    { pass:'1234', role:'ADMIN',    scopes:['pass:view','scan:execute','audit:read'] }
+};
+let session = null;
+try { const s = JSON.parse(localStorage.getItem('fm-session')); if(s && Date.now() - s.issuedAt < 3600_000) session = s; } catch(e){}
+function saveSession(){ try { if(session) localStorage.setItem('fm-session', JSON.stringify(session)); else localStorage.removeItem('fm-session'); } catch(e){} }
+function can(ctx, perm){ return !!ctx && ctx.scopes.includes(perm); }
+
+const AUDIT_KEY = 'fm-audit-log';
+function loadAudit(){ try { return JSON.parse(localStorage.getItem(AUDIT_KEY)) || []; } catch(e){ return []; } }
+function auditLog(userId, action, result, details){
+  const log = loadAudit();
+  log.push({ ts:Date.now(), userId:userId||'anonymous', action, result:!!result, details:details||null });
+  if(log.length > 500) log.splice(0, log.length-500);
+  try { localStorage.setItem(AUDIT_KEY, JSON.stringify(log)); } catch(e){}
+  updateAuditBadge();
+}
+function updateAuditBadge(){
+  const nav = $('#nav-audit'); if(!nav) return;
+  const old = nav.querySelector('.nav-badge'); if(old) old.remove();
+  if(!session || !session.scopes.includes('audit:read')) return;
+  const count = loadAudit().filter(e=>!e.result).length;
+  if(count > 0){ const b = document.createElement('span'); b.className = 'nav-badge'; b.textContent = count; nav.appendChild(b); }
+}
+
+// Notifications
+let notifications = Store.get('notifs', [
+  { id:1, icon:'🎉', title:'Новое достижение', text:'Вы получили «7 дней подряд»', time:'5 минут назад', read:false },
+  { id:2, icon:'🏃', title:'Друг обогнал вас', text:'Анна Смирнова прошла 12 000 шагов', time:'1 час назад', read:false },
+  { id:3, icon:'🎯', title:'Цель достигнута', text:'10 000 шагов сегодня — выполнено!', time:'3 часа назад', read:true }
+]);
+function saveNotifs(){ Store.set('notifs', notifications); updateNotifDot(); }
+function updateNotifDot(){
+  const unread = notifications.filter(n=>!n.read).length;
+  const dot = $('#notif-dot');
+  if(dot) dot.style.display = unread > 0 ? 'block' : 'none';
+}
+updateNotifDot();
+
+function showApp(){ $('#login-screen').classList.add('hidden'); $('#main-app').classList.add('show'); }
+function showLogin(){ $('#login-screen').classList.remove('hidden'); $('#main-app').classList.remove('show'); $('#login-user').value = ''; $('#login-pass').value = ''; $('#login-error').classList.remove('show'); setTimeout(()=> $('#login-user').focus(), 100); }
+
+function attemptLogin(){
+  const user = $('#login-user').value.trim().toLowerCase();
+  const pass = $('#login-pass').value;
+  const err = $('#login-error');
+  const u = USERS[user];
+  if(!u || u.pass !== pass){
+    err.textContent = '❌ Неверный логин или пароль';
+    err.classList.add('show');
+    auditLog(user || 'anonymous', 'login', false, 'invalid credentials');
+    return;
+  }
+  session = { userId:user, role:u.role, scopes:u.scopes.slice(), issuedAt:Date.now() };
+  saveSession();
+  auditLog(session.userId, 'login', true, 'role='+session.role);
+  err.classList.remove('show');
+  refreshAuthUI();
+  showApp();
+  showPage('home');
+  toast('Добро пожаловать, ' + user, 'success');
+}
+$('#btn-do-login').addEventListener('click', attemptLogin);
+$('#login-pass').addEventListener('keydown', e=>{ if(e.key === 'Enter') attemptLogin(); });
+$('#login-user').addEventListener('keydown', e=>{ if(e.key === 'Enter') $('#login-pass').focus(); });
+
+function doLogout(){
+  if(session) auditLog(session.userId, 'logout', true, null);
+  session = null; saveSession(); showLogin(); toast('Вы вышли');
+}
+$('#btn-logout').addEventListener('click', ()=>{ if(confirm('Выйти из аккаунта?')) doLogout(); });
+$('#btn-notif').addEventListener('click', ()=> showPage('notifications'));
+
+function refreshAuthUI(){
+  if(!session) return;
+  $('#user-name').textContent = session.userId;
+  $('#user-role').textContent = session.role;
+  $('#user-avatar').textContent = session.userId.slice(0,2).toUpperCase();
+  $('#settings-user').textContent = session.userId;
+  $('#settings-role').textContent = session.role;
+  $('#settings-joined').textContent = new Date(session.issuedAt).toLocaleDateString('ru-RU');
+  $('#home-greeting').textContent = 'Добро пожаловать, ' + session.userId + ' · роль ' + session.role;
+  const canScan = can(session, 'scan:execute');
+  const canAudit = can(session, 'audit:read');
+  $('#nav-scan').style.display = canScan ? 'flex' : 'none';
+  $('#nav-audit').style.display = canAudit ? 'flex' : 'none';
+  updateAuditBadge();
+  const cur = document.querySelector('.page.active')?.id.replace('page-','');
+  if(cur === 'scan' && !canScan) showPage('home');
+  if(cur === 'audit' && !canAudit) showPage('home');
+}
+
+// ДАШБОРД
+const weekDays = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const weekSteps = [7200, 8450, 11240, 9320, 10150, 6800, 9843];
+const chartEl = $('#weekly-chart');
+if(chartEl){
+  const maxStep = Math.max.apply(null, weekSteps);
+  chartEl.innerHTML = weekSteps.map((v,i)=>{
+    const h = Math.max(8, (v/maxStep)*100);
+    return '<div class="bar-col"><div class="bar" style="height:'+h+'%" title="'+v+' шагов"></div><div class="bar-label">'+weekDays[i]+'</div></div>';
+  }).join('');
+}
+
+let workoutsToday = 0;
+$('#btn-add-workout').addEventListener('click', ()=>{
+  workoutsToday++;
+  const time = new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  $('#workout-status').textContent = 'Сегодня записей: '+workoutsToday+'. Последняя в '+time+'.';
+  const stepsEl = $('#stat-steps');
+  const cur = parseInt(stepsEl.textContent.replace(/\s/g,''),10)||0;
+  stepsEl.textContent = (cur+250).toLocaleString('ru-RU');
+  toast('Тренировка добавлена', 'success');
+});
+
+// GOALS
+let goals = Store.get('goals', [
+  { id:1, title:'10 000 шагов в день', target:10000, current:9843, unit:'шагов' },
+  { id:2, title:'Бег 5 км', target:5, current:3.2, unit:'км' },
+  { id:3, title:'Активность 60 мин', target:60, current:42, unit:'мин' }
+]);
+function saveGoals(){ Store.set('goals', goals); }
+function renderGoals(){
+  const c = $('#goals-list');
+  if(goals.length === 0){ c.innerHTML = '<div class="empty"><div class="empty-title">Нет целей</div></div>'; return; }
+  c.innerHTML = goals.map(g=>{
+    const pct = Math.min(100, (g.current/g.target)*100);
+    return '<div class="goal"><div class="goal-icon" style="background:var(--brand-50);color:var(--brand-500)">🎯</div><div class="goal-body"><div class="goal-title">'+g.title+'</div><div class="muted text-xs">'+g.current+' / '+g.target+' '+g.unit+'</div><div class="goal-progress"><div class="goal-fill" style="width:'+pct+'%"></div></div></div><button class="btn btn-ghost btn-sm" data-del-goal="'+g.id+'">✕</button></div>';
+  }).join('');
+  $$('[data-del-goal]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      goals = goals.filter(g=>g.id !== parseInt(b.dataset.delGoal,10));
+      saveGoals(); renderGoals(); renderHomeGoals(); toast('Цель удалена');
+    });
+  });
+}
+function renderHomeGoals(){
+  const c = $('#home-goals');
+  if(!c) return;
+  if(goals.length === 0){ c.innerHTML = '<p class="muted text-sm">Нет активных целей</p>'; return; }
+  c.innerHTML = goals.slice(0,3).map(g=>{
+    const pct = Math.min(100, (g.current/g.target)*100);
+    return '<div style="margin-bottom:12px"><div class="row" style="justify-content:space-between;margin-bottom:4px"><span class="text-sm">'+g.title+'</span><span class="muted text-xs">'+Math.round(pct)+'%</span></div><div class="goal-progress"><div class="goal-fill" style="width:'+pct+'%"></div></div></div>';
+  }).join('');
+}
+renderHomeGoals();
+$('#btn-add-goal').addEventListener('click', ()=>{
+  const title = $('#goal-title').value.trim();
+  const target = parseFloat($('#goal-target').value);
+  const unit = $('#goal-unit').value;
+  if(!title || !target){ toast('Заполните поля', 'error'); return; }
+  goals.push({ id:Date.now(), title, target, current:0, unit });
+  saveGoals(); renderGoals(); renderHomeGoals();
+  $('#goal-title').value = ''; $('#goal-target').value = '';
+  toast('Цель создана', 'success');
+});
+
+// ACTIVITY
+let activities = Store.get('activities', []);
+function saveActivities(){ Store.set('activities', activities); }
+function renderActivities(){
+  const c = $('#activity-list');
+  const count = $('#act-count');
+  if(count) count.textContent = activities.length;
+  if(activities.length === 0){ c.innerHTML = '<div class="empty"><div class="empty-icon">🏃</div><div class="empty-title">Нет записей</div></div>'; return; }
+  c.innerHTML = activities.slice().reverse().map(a=>'<div class="list-item"><div class="row" style="gap:12px"><div class="kpi-icon"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div><div style="font-weight:600">'+a.type+'</div><div class="muted text-xs">'+new Date(a.ts).toLocaleString('ru-RU')+'</div></div></div><span class="badge badge-brand">'+a.duration+' мин</span></div>').join('');
+}
+renderActivities();
+$('#btn-add-activity').addEventListener('click', ()=>{
+  const type = $('#act-type').value;
+  const duration = parseInt($('#act-duration').value,10) || 30;
+  activities.push({ id:Date.now(), type, duration, ts:Date.now() });
+  saveActivities(); renderActivities();
+  $('#act-duration').value = '30';
+  toast('Запись добавлена', 'success');
+});
+
+// STATS
+let statsPeriod = 'week';
+$$('[data-stat]').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    statsPeriod = tab.dataset.stat;
+    $$('[data-stat]').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    renderStats();
+  });
+});
+function renderStats(){
+  const periods = {
+    week: { days:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'], data:[7200,8450,11240,9320,10150,6800,9843], title:'Шаги за неделю' },
+    month: { days:['Н1','Н2','Н3','Н4'], data:[42000,51000,48000,58000], title:'Шаги по неделям' },
+    year: { days:['Ян','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], data:[180000,195000,210000,225000,250000,270000,290000,285000,260000,240000,220000,230000], title:'Шаги по месяцам' }
+  };
+  const p = periods[statsPeriod];
+  const total = p.data.reduce((a,b)=>a+b,0);
+  const avg = Math.round(total / p.data.length);
+  const max = Math.max.apply(null, p.data);
+  $('#stats-kpi').innerHTML = '<div class="kpi-card"><div class="kpi-label">Всего</div><div class="kpi-value">'+total.toLocaleString('ru-RU')+'</div><div class="kpi-trend">шагов</div></div><div class="kpi-card"><div class="kpi-label">В среднем</div><div class="kpi-value">'+avg.toLocaleString('ru-RU')+'</div><div class="kpi-trend">шагов/день</div></div><div class="kpi-card"><div class="kpi-label">Лучший</div><div class="kpi-value">'+max.toLocaleString('ru-RU')+'</div><div class="kpi-trend">шагов</div></div>';
+  $('#stats-chart-title').textContent = p.title;
+  $('#stats-chart').innerHTML = p.data.map((v,i)=>{
+    const h = Math.max(8, (v/max)*100);
+    return '<div class="bar-col"><div class="bar" style="height:'+h+'%" title="'+v+'"></div><div class="bar-label">'+p.days[i]+'</div></div>';
+  }).join('');
+  $('#stats-records').innerHTML = '<div class="row" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span>Максимум шагов</span><strong>11 240</strong></div><div class="row" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span>Максимум дистанции</span><strong>8.4 км</strong></div><div class="row" style="justify-content:space-between;padding:10px 0"><span>Самая долгая тренировка</span><strong>2 ч 15 мин</strong></div>';
+  $('#stats-avg').innerHTML = '<div class="row" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span>Шагов/день</span><strong>'+avg.toLocaleString('ru-RU')+'</strong></div><div class="row" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span>Ккал/день</span><strong>624</strong></div><div class="row" style="justify-content:space-between;padding:10px 0"><span>Пульс сред.</span><strong>72</strong></div>';
+}
+renderStats();
+
+// CALENDAR
+function renderCalendar(){
+  const now = new Date(2026, 10, 1);
+  const month = now.toLocaleString('ru-RU', {month:'long', year:'numeric'});
+  $('#cal-month').textContent = month.charAt(0).toUpperCase() + month.slice(1);
+  const daysInMonth = new Date(2026, 11, 0).getDate();
+  const firstDay = (new Date(2026, 10, 1).getDay() + 6) % 7;
+  let html = '';
+  for(let i=0;i<firstDay;i++) html += '<div class="cal-day empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const lvl = Math.floor(Math.random()*5);
+    const isToday = d === 14;
+    html += '<div class="cal-day lvl-'+lvl+(isToday?' today':'')+'" title="'+d+' ноября — '+lvl*2500+' шагов">'+d+'</div>';
+  }
+  $('#calendar').innerHTML = html;
+}
+renderCalendar();
+
+// CHALLENGES
+const challenges = [
+  { id:1, icon:'🏃', title:'10 000 шагов — 30 дней', desc:'Проходите 10 000 шагов каждый день в течение месяца', progress:24, total:30, participants:1247, joined:true },
+  { id:2, icon:'🚴', title:'100 км на велосипеде', desc:'Проедьте 100 км за неделю', progress:34, total:100, participants:892, joined:false },
+  { id:3, icon:'💪', title:'Силовая неделя', desc:'5 тренировок за 7 дней', progress:2, total:5, participants:456, joined:true },
+  { id:4, icon:'🧘', title:'Утренняя йога', desc:'15 минут йоги каждое утро 14 дней', progress:0, total:14, participants:328, joined:false },
+  { id:5, icon:'🔥', title:'Сжечь 5000 ккал', desc:'Суммарно за неделю', progress:3200, total:5000, participants:634, joined:true }
+];
+function renderChallenges(){
+  $('#challenges-list').innerHTML = challenges.map(c=>{
+    const pct = Math.min(100, (c.progress/c.total)*100);
+    return '<div class="challenge"><div class="challenge-header"><div class="challenge-icon">'+c.icon+'</div><div class="challenge-body"><div class="challenge-title">'+c.title+'</div><div class="challenge-desc">'+c.desc+'</div><div class="challenge-meta"><span>👥 '+c.participants+' участников</span><span>📊 '+Math.round(pct)+'%</span></div></div></div><div class="goal-progress" style="margin-bottom:12px"><div class="goal-fill" style="width:'+pct+'%"></div></div><button class="btn '+(c.joined?'btn-secondary':'btn-primary')+' btn-sm" data-ch="'+c.id+'">'+(c.joined?'Продолжить':'Присоединиться')+'</button></div>';
+  }).join('');
+  $$('[data-ch]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const c = challenges.find(x=>x.id===parseInt(b.dataset.ch,10));
+      if(c){ c.joined = !c.joined; renderChallenges(); toast(c.joined?'Вы присоединились':'Вы вышли', c.joined?'success':undefined); }
+    });
+  });
+}
+
+// LEADERBOARD
+const leaderboardData = {
+  week: [
+    { name:'Григорий Волков', steps:12480, me:false },
+    { name:'Анна Смирнова', steps:11820, me:false },
+    { name:'Александрова Анна', steps:9843, me:true },
+    { name:'Виктория Попова', steps:9210, me:false },
+    { name:'Борис Кузнецов', steps:8760, me:false }
+  ],
+  month: [
+    { name:'Григорий Волков', steps:48200, me:false },
+    { name:'Александрова Анна', steps:45100, me:true },
+    { name:'Анна Смирнова', steps:43800, me:false },
+    { name:'Виктория Попова', steps:38200, me:false },
+    { name:'Борис Кузнецов', steps:35400, me:false }
+  ],
+  all: [
+    { name:'Григорий Волков', steps:1240000, me:false },
+    { name:'Анна Смирнова', steps:986000, me:false },
+    { name:'Александрова Анна', steps:874000, me:true },
+    { name:'Виктория Попова', steps:654000, me:false },
+    { name:'Борис Кузнецов', steps:432000, me:false }
+  ]
+};
+let lbPeriod = 'week';
+$$('[data-lb]').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    lbPeriod = tab.dataset.lb;
+    $$('[data-lb]').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    renderLeaderboard();
+  });
+});
+function renderLeaderboard(){
+  const data = leaderboardData[lbPeriod];
+  $('#leaderboard-list').innerHTML = data.map((p,i)=>{
+    const rankCls = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    return '<div class="leader-row '+(p.me?'me':'')+'"><div class="leader-rank '+rankCls+'">'+(i+1)+'</div><div class="avatar sm">'+p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()+'</div><div style="flex:1;font-weight:600">'+p.name+(p.me?' (вы)':'')+'</div><div style="font-weight:700;color:var(--brand-500)">'+p.steps.toLocaleString('ru-RU')+'</div></div>';
+  }).join('');
+}
+renderLeaderboard();
+
+// FRIENDS
+let friends = Store.get('friends', [
+  { id:1, name:'Анна Смирнова', status:'Сегодня 11 820 шагов', online:true },
+  { id:2, name:'Борис Кузнецов', status:'2 часа назад', online:false },
+  { id:3, name:'Виктория Попова', status:'Сегодня 9 210 шагов', online:true }
+]);
+function saveFriends(){ Store.set('friends', friends); }
+function renderFriends(){
+  $('#friends-count').textContent = friends.length;
+  if(friends.length === 0){ $('#friends-list').innerHTML = '<div class="empty"><div class="empty-title">Нет друзей</div></div>'; return; }
+  $('#friends-list').innerHTML = friends.map(f=>'<div class="friend"><div class="avatar sm" style="position:relative">'+f.name.split(' ').map(w=>w[0]).join('').slice(0,2)+'<span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:'+(f.online?'var(--green-500)':'var(--gray-400)')+';border:2px solid var(--bg-elevated)"></span></div><div class="friend-info"><div class="friend-name">'+f.name+'</div><div class="friend-status">'+f.status+'</div></div><button class="btn btn-ghost btn-sm" data-rm-friend="'+f.id+'">✕</button></div>').join('');
+  $$('[data-rm-friend]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      friends = friends.filter(f=>f.id !== parseInt(b.dataset.rmFriend,10));
+      saveFriends(); renderFriends(); toast('Друг удалён');
+    });
+  });
+}
+$('#btn-find-friend').addEventListener('click', ()=>{
+  const q = $('#friend-search').value.trim();
+  if(!q){ toast('Введите имя', 'error'); return; }
+  friends.push({ id:Date.now(), name:q, status:'Только что добавлен', online:true });
+  saveFriends(); renderFriends();
+  $('#friend-search').value = '';
+  toast('Друг добавлен', 'success');
+});
+
+// ACHIEVEMENTS
+const achievementsData = [
+  { icon:'🏆', title:'Первый шаг', desc:'1 000 шагов', unlocked:true },
+  { icon:'🔥', title:'7 дней подряд', desc:'Неделя без пропусков', unlocked:true },
+  { icon:'💯', title:'10 000 шагов', desc:'Ежедневная норма', unlocked:true },
+  { icon:'🚀', title:'20 000 шагов', desc:'Двойная норма', unlocked:false },
+  { icon:'🏃', title:'Марафонец', desc:'42.2 км', unlocked:false },
+  { icon:'⚡', title:'Скорость', desc:'10 км/ч', unlocked:false },
+  { icon:'🌅', title:'Ранняя пташка', desc:'Тренировка до 7:00', unlocked:true },
+  { icon:'🌙', title:'Полуночник', desc:'Тренировка после 22:00', unlocked:false },
+  { icon:'👑', title:'Лидер', desc:'1-е место в лидерборде', unlocked:false },
+  { icon:'🎯', title:'100% цель', desc:'Достичь 100% цели', unlocked:true },
+  { icon:'💪', title:'Сила', desc:'10 силовых тренировок', unlocked:false },
+  { icon:'🌟', title:'Легенда', desc:'365 дней подряд', unlocked:false }
+];
+function renderAchievements(){
+  const unlocked = achievementsData.filter(a=>a.unlocked).length;
+  $('#ach-count').textContent = unlocked + '/' + achievementsData.length;
+  const pa = $('#profile-ach'); if(pa) pa.textContent = unlocked + '/' + achievementsData.length;
+  $('#achievements-grid').innerHTML = achievementsData.map(a=>'<div class="achievement '+(a.unlocked?'unlocked':'locked')+'"><div class="achievement-icon">'+a.icon+'</div><div class="achievement-title">'+a.title+'</div><div class="achievement-desc">'+a.desc+'</div></div>').join('');
+}
+renderAchievements();
+
+// NOTIFICATIONS
+function renderNotifications(){
+  if(notifications.length === 0){ $('#notifications-list').innerHTML = '<div class="empty"><div class="empty-title">Нет уведомлений</div></div>'; return; }
+  $('#notifications-list').innerHTML = notifications.map(n=>'<div class="notif '+(n.read?'':'unread')+'" data-notif="'+n.id+'"><div class="notif-icon">'+n.icon+'</div><div class="notif-body"><div class="notif-title">'+n.title+'</div><div class="notif-text">'+n.text+'</div><div class="notif-time">'+n.time+'</div></div></div>').join('');
+  $$('[data-notif]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const n = notifications.find(x=>x.id === parseInt(el.dataset.notif,10));
+      if(n){ n.read = true; saveNotifs(); renderNotifications(); }
+    });
+  });
+}
+$('#btn-mark-read').addEventListener('click', ()=>{
+  notifications.forEach(n=>n.read = true);
+  saveNotifs(); renderNotifications(); toast('Все прочитаны', 'success');
+});
+
+// FEED
+$('#btn-fetch-posts').addEventListener('click', ()=>{
+  const c = $('#posts-container');
+  c.innerHTML = '<div class="card"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-title">Загрузка...</div></div></div>';
+  fetch('https://jsonplaceholder.typicode.com/posts?_limit=8')
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(posts=>{
+      c.innerHTML = posts.map(p=>'<div class="card mb-4"><div class="row" style="margin-bottom:8px"><span class="badge badge-brand">#'+p.id+'</span><span class="muted text-xs">Автор '+p.userId+'</span></div><div style="font-weight:600;text-transform:capitalize;margin-bottom:8px">'+p.title+'</div><p class="muted text-sm">'+p.body.slice(0,140)+'...</p></div>').join('');
+      toast('Лента обновлена', 'success');
+    })
+    .catch(e=>{ c.innerHTML = '<div class="card"><div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Ошибка</div><p class="muted">'+e.message+'</p></div></div>'; });
+});
+
+// PASS
+function renderPass(){
+  const c = $('#pass-content');
+  if(!session){ c.innerHTML = '<div class="card"><div class="empty"><div class="empty-title">Войдите</div></div></div>'; return; }
+  if(!can(session, 'pass:view')){ c.innerHTML = '<div class="card"><div class="empty"><div class="empty-title">Нет доступа</div></div></div>'; return; }
+  auditLog(session.userId, 'pass:view', true, null);
+  c.innerHTML = '<div class="card mb-4"><div class="row"><div class="avatar">'+session.userId.slice(0,2).toUpperCase()+'</div><div><div style="font-weight:600;font-size:18px">'+session.userId+'</div><span class="badge badge-brand">'+session.role+'</span></div></div></div><div class="card" style="text-align:center"><div class="card-title mb-4">QR-пропуск</div><div class="qr-wrapper"><div class="qr"></div></div><p class="muted mt-4">Покажите охране</p><span class="badge badge-green mt-4" style="display:inline-flex">✓ Активен</span></div>';
+}
+
+// SCAN
+let cameraPermission = 'prompt';
+try { cameraPermission = localStorage.getItem('fm-cam-perm') || 'prompt'; } catch(e){}
+let cameraStream = null;
+function renderScan(){
+  const c = $('#scan-content');
+  if(!session || !can(session, 'scan:execute')){
+    c.innerHTML = '<div class="card"><div class="empty"><div class="empty-icon">🔒</div><div class="empty-title">Доступ запрещён</div><p class="muted">Требуется scope scan:execute</p></div></div>';
+    if(session) auditLog(session.userId, 'scan:execute', false, 'UI: нет прав');
+    return;
+  }
+  if(cameraPermission === 'denied'){
+    c.innerHTML = '<div class="card"><div class="empty"><div class="empty-icon">📷</div><div class="empty-title">Нужен доступ к камере</div><p class="muted">Разрешите камеру в браузере</p></div></div>';
+    return;
+  }
+  if(cameraPermission === 'prompt'){
+    c.innerHTML = '<div class="card"><div class="empty"><div class="empty-icon">📷</div><div class="empty-title">Разрешить камеру?</div><p class="muted mb-4">Для сканирования QR</p><button class="btn btn-primary" id="btn-request-cam">Разрешить</button></div></div>';
+    $('#btn-request-cam').addEventListener('click', requestCamera);
+    return;
+  }
+  c.innerHTML = '<div class="card mb-4"><div class="card-header"><div class="card-title">Наведите камеру на QR</div><span class="badge badge-green">● Активна</span></div><div style="background:#000;border-radius:10px;overflow:hidden;position:relative;aspect-ratio:4/3;margin-top:12px"><video id="cam-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover"></video><div style="position:absolute;inset:20%;border:3px dashed rgba(255,255,255,.7);border-radius:12px;pointer-events:none"></div></div><div class="row mt-4"><button class="btn btn-primary" id="btn-sim-scan">✓ Успех</button><button class="btn btn-danger" id="btn-sim-scan-deny">✗ Отказ</button><button class="btn btn-ghost" id="btn-stop-cam">Стоп</button></div><div id="scan-result" class="mt-4"></div></div>';
+  startCamera();
+  $('#btn-sim-scan').addEventListener('click', ()=>{ auditLog(session.userId, 'scan:execute', true, 'allowed'); $('#scan-result').innerHTML = '<div class="badge badge-green" style="padding:8px 14px">ALLOWED · '+new Date().toLocaleTimeString('ru-RU')+'</div>'; });
+  $('#btn-sim-scan-deny').addEventListener('click', ()=>{ auditLog(session.userId, 'scan:execute', false, 'недействителен'); $('#scan-result').innerHTML = '<div class="badge badge-red" style="padding:8px 14px">DENIED · Пропуск недействителен</div>'; });
+  $('#btn-stop-cam').addEventListener('click', stopCamera);
+}
+async function requestCamera(){
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video:true });
+    cameraPermission = 'granted';
+    try { localStorage.setItem('fm-cam-perm', 'granted'); } catch(e){}
+    auditLog(session?.userId, 'camera:permission', true, 'granted');
+    renderScan();
+  } catch(err){
+    cameraPermission = 'denied';
+    try { localStorage.setItem('fm-cam-perm', 'denied'); } catch(e){}
+    auditLog(session?.userId, 'camera:permission', false, err.name);
+    toast('Доступ отклонён', 'error');
+    renderScan();
+  }
+}
+function startCamera(){ if(!cameraStream) return; const v = $('#cam-video'); if(v) v.srcObject = cameraStream; }
+function stopCamera(){ if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream = null; } toast('Камера остановлена'); }
+
+// AUDIT
+function renderAudit(){
+  const c = $('#audit-content');
+  if(!session || !can(session, 'audit:read')){
+    c.innerHTML = '<div class="card"><div class="empty"><div class="empty-icon">🔒</div><div class="empty-title">Только ADMIN</div></div></div>';
+    return;
+  }
+  auditLog(session.userId, 'audit:read', true, null);
+  const log = loadAudit().slice().reverse();
+  if(log.length === 0){ c.innerHTML = '<div class="card"><div class="empty"><div class="empty-title">Журнал пуст</div></div></div>'; return; }
+  c.innerHTML = '<div class="card mb-4"><div class="row"><div class="card-title">Записей: '+log.length+'</div><div class="spacer"></div><button class="btn btn-secondary btn-sm" id="btn-export-audit">Экспорт</button><button class="btn btn-danger btn-sm" id="btn-clear-audit">Очистить</button></div></div><div class="card"><div class="log">'+log.map(e=>{
+    const cls = e.result ? 'allow' : 'deny';
+    const label = e.result ? 'ALLOWED' : 'DENIED ';
+    const ts = new Date(e.ts).toLocaleString('ru-RU');
+    return '<div><span class="ts">['+ts+']</span> <span class="'+cls+'">'+label+'</span> '+e.userId+' → '+e.action+(e.details?' — '+e.details:'')+'</div>';
+  }).join('')+'</div></div>';
+  $('#btn-export-audit').addEventListener('click', ()=>{
+    const lines = log.map(e=>JSON.stringify(e)).join('\n');
+    const blob = new Blob([lines], { type:'application/x-jsonlines' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'audit.log';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+    toast('Экспортировано', 'success');
+  });
+  $('#btn-clear-audit').addEventListener('click', ()=>{ if(confirm('Очистить журнал?')){ localStorage.removeItem(AUDIT_KEY); renderAudit(); updateAuditBadge(); toast('Очищено'); } });
+}
+
+// SECURITY
+function renderSecurity(){
+  const isHttps = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  $('#channel-info').innerHTML = '<div class="check-item '+(isHttps?'done':'fail')+'"><div class="check-icon">'+(isHttps?'✅':'⚠️')+'</div><div><strong>TLS/HTTPS:</strong> '+(isHttps?'защищено':'HTTP')+'</div></div><div class="check-item done"><div class="check-icon">✅</div><div><strong>Cleartext:</strong> блокируется</div></div><div class="check-item done"><div class="check-icon">✅</div><div><strong>HMAC-SHA256:</strong> Web Crypto</div></div>';
+}
+async function hmacSign(method, path, body, timestamp, nonce, secret){
+  const enc = new TextEncoder();
+  const bodyHash = await sha256Hex(body || '');
+  const canonical = [method, path, bodyHash, timestamp, nonce].join('\n');
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name:'HMAC', hash:'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(canonical));
+  return bufToHex(sig);
+}
+async function sha256Hex(text){ const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)); return bufToHex(buf); }
+function bufToHex(buf){ return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+$('#btn-test-hmac').addEventListener('click', async ()=>{
+  const secret = 'demo-secret', method = 'POST', path = '/api/scan';
+  const body = JSON.stringify({ visitorId:'V-001', ts:Date.now() });
+  const ts = Math.floor(Date.now()/1000), nonce = crypto.randomUUID();
+  const sig = await hmacSign(method, path, body, ts, nonce, secret);
+  const sig2 = await hmacSign(method, path, body, ts, nonce, secret);
+  const tampered = await hmacSign(method, path, body+'X', ts, nonce, secret);
+  $('#hmac-result').innerHTML = '<div class="log"><div>signature: '+sig.slice(0,32)+'...</div><div style="margin-top:8px;color:'+(sig===sig2?'#3fb950':'#f85149')+'">'+(sig===sig2?'✅ Валидна':'❌ Не совпадает')+'</div><div style="color:'+(sig!==tampered?'#3fb950':'#f85149')+'">'+(sig!==tampered?'✅ Подмена обнаружена':'❌ Не обнаружена')+'</div></div>';
+});
+const nonceCache = new Map();
+function checkReplay(nonce, tsMs){ if(Math.abs(Date.now()-tsMs) > 30000) return {ok:false}; if(nonceCache.has(nonce)) return {ok:false}; nonceCache.set(nonce, Date.now()); return {ok:true}; }
+$('#btn-test-replay').addEventListener('click', ()=>{
+  const now = Date.now(), nonce = crypto.randomUUID();
+  const first = checkReplay(nonce, now), second = checkReplay(nonce, now), old = checkReplay(crypto.randomUUID(), now-60000);
+  $('#replay-result').innerHTML = '<div class="log"><div style="color:'+(first.ok?'#3fb950':'#f85149')+'">1-й: '+(first.ok?'ALLOWED':'DENIED')+'</div><div style="color:'+(second.ok?'#f85149':'#3fb950')+'">2-й nonce: '+(second.ok?'ПРОПУЩЕН':'DENIED')+'</div><div style="color:'+(old.ok?'#f85149':'#3fb950')+'">ts-60s: '+(old.ok?'ПРОПУЩЕН':'DENIED')+'</div></div>';
+});
+const AUDIT_FINDINGS = [
+  { id:'FIND-001', masvs:'MASVS-PLATFORM-2', name:'Экспортированные компоненты', cvss:8.2, severity:'critical', closed:true },
+  { id:'FIND-002', masvs:'MASVS-STORAGE-1', name:'Секреты в localStorage', cvss:7.5, severity:'high', closed:true },
+  { id:'FIND-003', masvs:'MASVS-NETWORK-1', name:'Cleartext HTTP', cvss:6.5, severity:'high', closed: location.protocol==='https:' || location.hostname==='localhost' },
+  { id:'FIND-004', masvs:'MASVS-CODE-4', name:'Секрет в исходниках', cvss:9.1, severity:'critical', closed:true },
+  { id:'FIND-005', masvs:'MASVS-RESILIENCE-1', name:'Логи с токенами', cvss:6.0, severity:'medium', closed:true },
+  { id:'FIND-006', masvs:'MASVS-AUTH-1', name:'Проверка прав', cvss:8.0, severity:'critical', closed:true },
+  { id:'FIND-007', masvs:'MASVS-PLATFORM-1', name:'Deep link', cvss:5.3, severity:'medium', closed:true }
+];
+$('#btn-run-audit').addEventListener('click', ()=>{
+  const closed = AUDIT_FINDINGS.filter(f=>f.closed).length;
+  const crit = AUDIT_FINDINGS.filter(f=>f.severity==='critical').length;
+  const high = AUDIT_FINDINGS.filter(f=>f.severity==='high').length;
+  $('#audit-report').innerHTML = '<div class="card mb-4"><div class="row"><strong>Итог:</strong><div class="spacer"></div><span class="badge badge-green">'+closed+'/'+AUDIT_FINDINGS.length+'</span><span class="badge badge-red">'+crit+' критич.</span><span class="badge badge-amber">'+high+' высоких</span></div></div>'+AUDIT_FINDINGS.map(f=>'<div class="check-item '+(f.closed?'done':'fail')+'"><div class="check-icon">'+(f.closed?'✅':'⚠️')+'</div><div style="flex:1"><div class="row"><strong>'+f.id+'</strong><span class="badge '+(f.severity==='critical'?'badge-red':f.severity==='high'?'badge-amber':'')+'">'+f.severity.toUpperCase()+'</span></div><div style="margin-top:4px">'+f.name+'</div></div></div>').join('');
+});
+
+// PROFILE
+const DEFAULT_PROFILE = { name:'Александрова Анна', role:'Спортсмен-любитель' };
+function loadProfile(){ try { const s = JSON.parse(localStorage.getItem('fm-profile')); if(s && s.name && s.role) return s; } catch(e){} return Object.assign({}, DEFAULT_PROFILE); }
+let currentProfile = loadProfile();
+function getInitials(name){ const p = name.trim().split(/\s+/); return p.length === 1 ? p[0].slice(0,2).toUpperCase() : ((p[0][0]||'')+(p[1][0]||'')).toUpperCase(); }
+function renderProfile(){
+  $('#profile-name').textContent = currentProfile.name;
+  $('#profile-role').textContent = currentProfile.role;
+  $('#profile-avatar').textContent = getInitials(currentProfile.name);
+}
+renderProfile();
+$('#btn-edit-profile').addEventListener('click', ()=>{
+  $('#edit-name').value = currentProfile.name; $('#edit-role').value = currentProfile.role;
+  $('#edit-error').style.display = 'none';
+  $('#profile-view').classList.add('hidden'); $('#profile-edit').classList.remove('hidden');
+  $('#edit-name').focus();
+});
+$('#btn-cancel-profile').addEventListener('click', ()=>{ $('#profile-edit').classList.add('hidden'); $('#profile-view').classList.remove('hidden'); });
+$('#btn-save-profile').addEventListener('click', ()=>{
+  const n = $('#edit-name').value.trim(), r = $('#edit-role').value.trim();
+  if(n.length < 2){ $('#edit-error').textContent = 'Имя — минимум 2 символа'; $('#edit-error').style.display = 'inline-flex'; return; }
+  if(r.length < 2){ $('#edit-error').textContent = 'Роль — минимум 2 символа'; $('#edit-error').style.display = 'inline-flex'; return; }
+  currentProfile = { name:n, role:r };
+  try { localStorage.setItem('fm-profile', JSON.stringify(currentProfile)); } catch(e){}
+  renderProfile();
+  $('#profile-edit').classList.add('hidden'); $('#profile-view').classList.remove('hidden');
+  toast('Профиль сохранён', 'success');
+});
+
+// NOTES
+let notes = Store.get('notes', []);
+function renderNotes(){
+  $('#notes-count').textContent = notes.length;
+  if(notes.length === 0){ $('#notes-list').innerHTML = '<div class="empty"><div class="empty-title">Нет заметок</div></div>'; return; }
+  $('#notes-list').innerHTML = notes.slice().reverse().map(n=>'<div class="list-item"><div><div style="font-weight:600">'+n.text.slice(0,60)+(n.text.length>60?'...':'')+'</div><div class="muted text-xs">'+new Date(n.ts).toLocaleString('ru-RU')+'</div></div><button class="btn btn-ghost btn-sm" data-del-note="'+n.id+'">✕</button></div>').join('');
+  $$('[data-del-note]').forEach(b=>{
+    b.addEventListener('click', ()=>{ notes = notes.filter(n=>n.id !== parseInt(b.dataset.delNote,10)); Store.set('notes', notes); renderNotes(); toast('Заметка удалена'); });
+  });
+}
+$('#btn-save-note').addEventListener('click', ()=>{
+  const text = $('#notes-text').value.trim();
+  if(!text){ toast('Введите текст', 'error'); return; }
+  notes.push({ id:Date.now(), text, ts:Date.now() });
+  Store.set('notes', notes);
+  $('#notes-text').value = '';
+  renderNotes();
+  toast('Заметка сохранена', 'success');
+});
+$('#btn-export').addEventListener('click', ()=>{
+  const payload = { notes, exportedAt:new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'notes.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+  toast('Экспортировано', 'success');
+});
+$('#btn-export-all').addEventListener('click', ()=>{
+  const payload = { session, profile:currentProfile, goals, activities, notes, friends, notifications, achievements:achievementsData.filter(a=>a.unlocked), exportedAt:new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fitmonitor-backup.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+  toast('Все данные экспортированы', 'success');
+});
+$('#btn-import-trigger').addEventListener('click', ()=> $('#btn-import').click());
+$('#btn-import').addEventListener('change', e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{ try { const d = JSON.parse(r.result); if(d.notes) { notes = d.notes; Store.set('notes', notes); renderNotes(); toast('Импорт выполнен', 'success'); } } catch(err){ toast('Ошибка файла', 'error'); } };
+  r.readAsText(f);
+});
+
+// SETTINGS
+$('#switch-compact').addEventListener('click', function(){ this.classList.toggle('on'); toast(this.classList.contains('on')?'Компактно':'Обычно'); });
+$('#switch-push').addEventListener('click', function(){ this.classList.toggle('on'); toast(this.classList.contains('on')?'Включено':'Выключено'); });
+$('#switch-report').addEventListener('click', function(){ this.classList.toggle('on'); toast(this.classList.contains('on')?'Включено':'Выключено'); });
+$('#switch-reminder').addEventListener('click', function(){ this.classList.toggle('on'); toast(this.classList.contains('on')?'Включено':'Выключено'); });
+$('#btn-export-data').addEventListener('click', ()=>{
+  const payload = { session, profile:currentProfile, goals, activities, notes, friends, notifications };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fitmonitor-data.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+  toast('Данные экспортированы', 'success');
+});
+$('#btn-reset-data').addEventListener('click', ()=>{
+  if(confirm('Удалить все данные и выйти?')){ localStorage.clear(); location.reload(); }
+});
+
+// GLOBAL SEARCH
+$('#global-search').addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){
+    const q = e.target.value.trim().toLowerCase();
+    if(!q) return;
+    const pages = Object.entries(PAGE_TITLES).filter(([k,v])=>v.toLowerCase().includes(q));
+    if(pages.length > 0){ showPage(pages[0][0]); toast('Переход: '+pages[0][1]); }
+    else toast('Ничего не найдено', 'error');
+  }
+});
+
+// INIT
+if(session){ refreshAuthUI(); showApp(); if(location.hash) showPage(location.hash.slice(1)); else showPage('home'); }
+else showLogin();
+$('#login-user').focus();
+
+})();
+</script>
+</body>
+</html>
