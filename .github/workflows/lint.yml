@@ -1,9 +1,0 @@
-name: Проверка HTML
-on: [push]
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Валидация HTML
-        run: echo "HTML валиден. Ошибок нет."
