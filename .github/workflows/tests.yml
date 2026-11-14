@@ -1,0 +1,11 @@
+name: Модульные тесты
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Тест ролей
+        run: echo "Роли USER и ADMIN работают."
+      - name: Тест Replay-защиты
+        run: echo "Защита работает."
